@@ -1,0 +1,9 @@
+#Eclipse
+.settings/
+.project
+.classpath
+#Maven
+target/*
+!target/*executable*.jar
+#Common
+*log/
