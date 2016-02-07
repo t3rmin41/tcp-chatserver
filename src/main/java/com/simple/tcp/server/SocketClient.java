@@ -12,9 +12,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SocketConnection implements Runnable {
+public class SocketClient implements Runnable {
     
-    private static Logger log = LoggerFactory.getLogger(SocketConnection.class);
+    private static Logger log = LoggerFactory.getLogger(SocketClient.class);
     
     private Long id;
     private Long remoteId;
@@ -23,7 +23,7 @@ public class SocketConnection implements Runnable {
     private PrintWriter localOutput;
     private PrintWriter remoteOutput;
         
-    public SocketConnection(Long id, Socket localSocket) {
+    public SocketClient(Long id, Socket localSocket) {
         this.id = id;
         this.localSocket = localSocket;
     }
@@ -58,7 +58,7 @@ public class SocketConnection implements Runnable {
     
     public void connectRemoteAndLocal(Set<Long> availableSocketId) throws IOException {
         localOutput.println("Available sockets:");
-        for (Long clientid : MultiClientServer.getSocketList()) {
+        for (Long clientid : availableSocketId) {
             if (clientid != this.id) {
                 localOutput.println("ID = " + clientid);
             }
@@ -86,18 +86,18 @@ public class SocketConnection implements Runnable {
                     )
                 ), true);
 
-            SocketConnection remoteSocketConnection =  MultiClientServer.getSocketConnectionById(remoteId);
+            SocketClient remoteClient =  MultiClientServer.getSocketClientById(remoteId);
 
             // on the remote connection, set remote output to this local output so that whatever typed on local, is observed on remote
-            remoteSocketConnection.setRemoteOutput(localOutput);
-            remoteSocketConnection.setRemoteId(id);
+            remoteClient.setRemoteOutput(localOutput);
+            remoteClient.setRemoteId(id);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void cleanUp() throws IOException {
-        MultiClientServer.removeConnection(id);
+        MultiClientServer.removeClient(id);
         localOutput.close();
         localInput.close();
         localSocket.close();
@@ -108,7 +108,7 @@ public class SocketConnection implements Runnable {
         try {
             initLocal();
             
-            Set<Long> socketSet = MultiClientServer.getSocketList();
+            Set<Long> socketSet = MultiClientServer.getClientList();
 
             if (socketSet.size() == 1) {
                 localOutput.println("You are the only client on server with ID = " + id);
