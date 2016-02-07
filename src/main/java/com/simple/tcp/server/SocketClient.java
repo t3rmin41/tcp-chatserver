@@ -96,6 +96,23 @@ public class SocketClient implements Runnable {
         }
     }
 
+    public void communicateWithRemote() throws IOException {
+        while(true) {
+            String messageString = localInput.readLine(); // Read message line by line
+            if (messageString == null) {
+                log.info("Client ID =  " + id + " closed connection with ID = " + remoteId);
+                break;
+            }
+            if ("END".equals(messageString)) {
+                log.info("Client ID = " + id + " requested connection close with ID = " + remoteId);
+                remoteOutput.println("ID = " + id + " requested communication end with you");
+                break;
+            }
+            remoteOutput.println("ID =  " + (id.equals(remoteId) ? id + " (you)" : id)  + " : " + messageString);
+            log.info("ID = " + id + " transmitted to ID = " + remoteId + " message : " + messageString);
+        }
+    }
+    
     public void cleanUp() throws IOException {
         MultiClientServer.removeClient(id);
         localOutput.close();
@@ -118,21 +135,8 @@ public class SocketClient implements Runnable {
                 connectRemoteAndLocal(socketSet);
             }
 
-            while(true) {
-                String messageString = localInput.readLine(); // Read message line by line
-                if (messageString == null) {
-                    log.info("Client ID =  " + id + " closed connection with ID = " + remoteId);
-                    break;
-                }
-                if ("END".equals(messageString)) {
-                    log.info("Client ID = " + id + " requested connection close with ID = " + remoteId);
-                    remoteOutput.println("ID = " + id + " requested communication end with you");
-                    break;
-                }
-                remoteOutput.println("ID =  " + (id.equals(remoteId) ? id + " (you)" : id)  + " : " + messageString);
-                log.info("ID = " + id + " transmitted to ID = " + remoteId + " message : " + messageString);
-            }
-            
+            communicateWithRemote();
+
             cleanUp();
             
         } catch (IOException e) {
