@@ -4,6 +4,8 @@
 .classpath
 #Maven
 target/*
-!target/*executable*.jar
 #Common
 *log/
+/target/
+#Include executable jar
+!target/*executable*.jar
